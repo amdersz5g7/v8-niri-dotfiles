@@ -1,0 +1,15 @@
+zimfw() { source /home/i3wm/.zim/zimfw.zsh "${@}" }
+zmodule() { source /home/i3wm/.zim/zimfw.zsh "${@}" }
+fpath=(/home/i3wm/.zim/modules/git/functions /home/i3wm/.zim/modules/utility/functions /home/i3wm/.zim/modules/prompt-pwd/functions /home/i3wm/.zim/modules/duration-info/functions /home/i3wm/.zim/modules/git-info/functions /home/i3wm/.zim/modules/zsh-completions/src ${fpath})
+autoload -Uz -- git-alias-lookup git-branch-current git-branch-delete-interactive git-branch-remote-tracking git-dir git-ignore-add git-root git-stash-clear-interactive git-stash-recover git-submodule-move git-submodule-remove mkcd mkpw prompt-pwd duration-info-precmd duration-info-preexec coalesce git-action git-info
+source /home/i3wm/.zim/modules/environment/init.zsh
+source /home/i3wm/.zim/modules/git/init.zsh
+source /home/i3wm/.zim/modules/input/init.zsh
+source /home/i3wm/.zim/modules/termtitle/init.zsh
+source /home/i3wm/.zim/modules/utility/init.zsh
+source /home/i3wm/.zim/modules/duration-info/init.zsh
+source /home/i3wm/.zim/modules/minimal/minimal.zsh-theme
+source /home/i3wm/.zim/modules/completion/init.zsh
+source /home/i3wm/.zim/modules/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /home/i3wm/.zim/modules/zsh-history-substring-search/zsh-history-substring-search.zsh
+source /home/i3wm/.zim/modules/zsh-autosuggestions/zsh-autosuggestions.zsh

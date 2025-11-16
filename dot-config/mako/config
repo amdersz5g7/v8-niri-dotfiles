@@ -1,0 +1,9 @@
+include=/home/i3wm/.cache/wal/mako
+
+border-radius=10
+text-alignment=center
+anchor=bottom-center
+outer-margin=12
+default-timeout=10000
+padding=20
+icon-border-radius=30

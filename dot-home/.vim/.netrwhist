@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =9
+let g:netrw_dirhist_9='/home/i3wm/Documents/Ruby/Exercise'
+let g:netrw_dirhist_8='/home/i3wm/Documents/Ruby'
+let g:netrw_dirhist_7='/home/i3wm/Documents'
+let g:netrw_dirhist_6='/home/i3wm'
+let g:netrw_dirhist_5='/home/i3wm/Documents/github/astro-try/grubby-gamma/node_modules/astro-icon/components'
+let g:netrw_dirhist_4='/home/i3wm/Documents/github/astro-try/grubby-gamma/node_modules/astro-icon'
+let g:netrw_dirhist_3='/home/i3wm/Documents/github/astro-try/grubby-gamma/node_modules'
+let g:netrw_dirhist_2='/home/i3wm/Documents/github/astro-try/grubby-gamma'
+let g:netrw_dirhist_1='/home/i3wm/Documents/github/astro-try/grubby-gamma/.astro'
+let g:netrw_dirhist_0='/home/i3wm/Documents/github/astro-try/grubby-gamma'
