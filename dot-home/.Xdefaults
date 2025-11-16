@@ -1,0 +1,7 @@
+UXTerm*faceName:        JetBrainsMono NF, Bold
+UXTerm*faceSize:        11
+XTerm*allowWindowOps:   true
+XTerm*dynamicTitle:     false
+UXTerm*VT100.translations: #override \
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD)
