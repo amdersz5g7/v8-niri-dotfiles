@@ -1,0 +1,117 @@
+modules-left = launcher dots bi bspwm bd sep bi filesystem bd
+#modules-center = bi bspwm bd
+#modules-center = bi bspwm_layout bd sep bi date bd sep bi usercard bd
+modules-center = bi date sep weather bd sep 
+modules-right = updates sep bi bluetooth bd bi cpu_bar bd bi memory_bar bd bi network bd bi pulseaudio bd dots systray sep power
+
+;==========================================================
+;
+;
+;   ██████╗  ██████╗ ██╗  ██╗   ██╗██████╗  █████╗ ██████╗
+;   ██╔══██╗██╔═══██╗██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗
+;   ██████╔╝██║   ██║██║   ╚████╔╝ ██████╔╝███████║██████╔╝
+;   ██╔═══╝ ██║   ██║██║    ╚██╔╝  ██╔══██╗██╔══██║██╔══██╗
+;   ██║     ╚██████╔╝███████╗██║   ██████╔╝██║  ██║██║  ██║
+;   ╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+;
+;  by husseinhareb :)
+;
+;==========================================================
+
+[colors]
+
+background-alt = #1E1E2E
+primary = #F0C674
+secondary = #8ABEB7
+alert = #A54242
+disabled = #707880
+white = #EAEAEA
+grey = #61616C
+green = #25D865
+blue = #168ECA
+mauve = #490761
+
+[bar/main]
+
+width = 100%
+height = 40pt
+radius = 10
+cursor-click = pointer
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+line-size = 4pt
+
+border-size = 3pt
+border-color = #0000000
+
+padding-left = 1
+padding-right = 1
+
+module-margin = 0
+
+modules-left = arch space date space space spo space spotify
+modules-center = xworkspaces
+modules-right = cava space space space space space mic space pulseaudio space space space space backlight space separator space battery space separator space wlan space
+[module/xworkspaces]
+type = internal/xworkspaces
+
+label-active = 
+label-active-padding = 1
+label-active-foreground = ${colors.disabled}
+label-active-font = 1
+
+label-occupied = 
+label-occupied-padding = 1
+label-occupied-font = 1
+
+label-empty = 
+label-empty-background = ${colors.background}
+label-empty-padding = 1
+label-empty-font = 1
+
+[module/xwindow]
+type = internal/xwindow
+label = %title:0:60:...%
+
+; Text
+font-0 = "JetBrainsMono:style=Bold:pixelsize=9;3"
+; Icons
+font-1 = "Font Awesome 6 Free Solid:size=10;3"
+font-2 = "Material Design Icons Desktop:size=11;3"
+font-3 = "Material Design Icons Desktop:size=15;4"
+; Glyphs
+font-4 = "MesloLGS NF:style=Regular:pixelsize=17;4"
+;dpi = 96
+
+;Modules availables but not active: 
+;	battery		brightness		weather
+modules-left = launcher dots bi bspwm bd sep bi filesystem bd
+#modules-center = bi bspwm bd
+#modules-center = bi bspwm_layout bd sep bi date bd sep bi usercard bd
+modules-center = bi xworkspaces bd
+modules-right = bi cpu_bar bd bi memory_bar bd bi network bd bi pulseaudio bd dots systray sep power
+# modules-right = updates sep bi cpu_bar bd bi memory_bar bd bi network bd bi pulseaudio bd dots systray sep power
+
+separator =
+dim-value = 0.75
+
+;;locale = es_MX.UTF-8
+
+wm-restack = bspwm
+enable-ipc = true
+
+cursor-click = pointer 
+cursor-scroll = ns-resize
+
+[settings]
+
+screenchange-reload = false
+
+compositing-background = source
+compositing-foreground = over
+compositing-overline = over
+compositing-underline = over
+compositing-border = over
+
+pseudo-transparency = false
