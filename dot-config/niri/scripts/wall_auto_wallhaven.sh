@@ -89,7 +89,7 @@ download_wallpaper() {
             
             # Update brave/chromium theme (optional)
             # If you use this, make sure the script exists and is compatible.
-            $HOME/Downloads/ChromiumPywal/generate-theme.sh > /dev/null 2>&1    
+            ~/Documents/AppScripts/ChromiumPywal/generate-theme.sh > /dev/null 2>&1    
 
             makoctl reload > /dev/null 2>&1
 
