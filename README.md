@@ -42,6 +42,12 @@
 ![Notification](assets/notification.png "Notification")
 
 ## Changelog
+- ### v26.03
+  	- Add animation glitch and smoke
+  	- ref:
+  	  - https://www.reddit.com/r/niri/comments/1s2u6mq/i_found_out_niri_has_glsl_support_for_animations/
+  	  - https://github.com/liixini/shaders
+  	    
 - ### v25.11
 	- Global
 		- Pywal = Wallust, Matugen
