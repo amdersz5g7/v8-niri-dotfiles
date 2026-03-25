@@ -83,7 +83,7 @@
 			- setelah melakukan perubahan config, ketik `makoctl reload`
 ---
 <p align="center">
-created: 16 Nov 2025 | updated: 16 Nov 2025
+created: 16 Nov 2025 | updated: 26 Mar 2026
 <br />
 Tangerang, Banten
 <br />
