@@ -1,0 +1,203 @@
+// Fire OPEN shader for Niri
+animations {
+  window-open {
+    duration-ms 1500
+    custom-shader r"
+        // Karakter efek:
+        //   - Retakan kaca muncul dari titik-titik acak (setiap window berbeda)
+        //   - Distorsi lensa halus di balik retakan (heat-lens warp)
+        //   - Kilatan cahaya biru-putih sinematik saat retakan terbentuk
+        //   - Window muncul di balik kaca yang pecah membuka
+        //   - Sepenuhnya sesuai spec niri: no uniform defs, premultiplied alpha,
+        //     handle coords di luar [0,1]
+        //
+        //   animations {
+        //     window-open {
+        //       duration-ms 900
+        //       custom-shader /path/to/shatter.glsl
+        //     }
+        //   }
+
+        // ── Utility ──────────────────────────────────────────────────────────────────
+
+        float hash11(float n) {
+            return fract(sin(n) * 43758.5453);
+        }
+
+        float hash21(vec2 p) {
+            return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+        }
+
+        float noise(vec2 p) {
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            float a = hash21(i);
+            float b = hash21(i + vec2(1.0, 0.0));
+            float c = hash21(i + vec2(0.0, 1.0));
+            float d = hash21(i + vec2(1.0, 1.0));
+            return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        }
+
+        float fbm(vec2 p) {
+            float v = 0.0, amp = 0.5;
+            for (int i = 0; i < 5; i++) {
+                v += amp * noise(p);
+                p *= 2.1;
+                amp *= 0.5;
+            }
+            return v;
+        }
+
+        // Jarak ke segmen garis — untuk menggambar retakan
+        float sdLine(vec2 p, vec2 a, vec2 b) {
+            vec2 pa = p - a;
+            vec2 ba = b - a;
+            float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+            return length(pa - ba * h);
+        }
+
+        // ── Satu retakan: origin → dua cabang + sub-cabang ───────────────────────────
+
+        float singleCrack(vec2 uv, float seed, float grow) {
+            float ox  = hash11(seed)        * 0.78 + 0.11;
+            float oy  = hash11(seed + 1.0)  * 0.78 + 0.11;
+            vec2  org = vec2(ox, oy);
+
+            float ang1 = hash11(seed + 2.0) * 6.2832;
+            float ang2 = ang1 + (hash11(seed + 3.0) - 0.5) * 2.4;
+            float ang3 = ang1 - (hash11(seed + 8.0) - 0.5) * 1.8;
+
+            float len1 = (0.15 + hash11(seed + 4.0) * 0.30) * grow;
+            float len2 = len1 * (0.5 + hash11(seed + 5.0) * 0.4);
+            float len3 = len1 * (0.3 + hash11(seed + 9.0) * 0.3);
+
+            vec2 tip1  = org + vec2(cos(ang1), sin(ang1)) * len1;
+            vec2 tip2  = org + vec2(cos(ang2), sin(ang2)) * len2;
+            vec2 tip3  = org + vec2(cos(ang3), sin(ang3)) * len3;
+
+            // Sub-cabang dari tip1
+            float sang = ang1 + (hash11(seed + 6.0) - 0.5) * 1.2;
+            float slen = len1 * (0.25 + hash11(seed + 7.0) * 0.25);
+            vec2  sub  = tip1 + vec2(cos(sang), sin(sang)) * slen;
+
+            float w = 0.0014 + hash11(seed + 10.0) * 0.001;
+
+            float d1 = sdLine(uv, org,  tip1);
+            float d2 = sdLine(uv, org,  tip2);
+            float d3 = sdLine(uv, org,  tip3);
+            float d4 = sdLine(uv, tip1, sub);
+
+            float c1 = 1.0 - smoothstep(0.0, w * 2.2, d1);
+            float c2 = 1.0 - smoothstep(0.0, w * 1.8, d2);
+            float c3 = 1.0 - smoothstep(0.0, w * 1.6, d3);
+            float c4 = 1.0 - smoothstep(0.0, w * 1.4, d4);
+
+            return max(max(c1, c2), max(c3, c4));
+        }
+
+        // ── Main ─────────────────────────────────────────────────────────────────────
+
+        vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+            float p    = niri_clamped_progress;
+            vec2  uv   = coords_geo.xy;
+            float seed = niri_random_seed * 53.71;
+            float t    = seed + p * 9.0;
+
+            // ── Distorsi lensa (warp) ─────────────────────────────────────────────
+            // Kuat di awal, hilang di akhir animasi — seperti kaca retak yang meluruskan diri
+            float warp_str = (1.0 - p) * (1.0 - p) * 0.055;
+            vec2  wq = vec2(fbm(uv * 3.0 + vec2(0.0,  t * 0.35)),
+                            fbm(uv * 3.0 + vec2(5.1,  t * 0.35)));
+            vec2  wr = vec2(fbm(uv * 2.5 + 3.0 * wq + vec2(t * 0.18, 1.7)),
+                            fbm(uv * 2.5 + 3.0 * wq + vec2(8.3, t * 0.18)));
+            vec2  warp_uv = uv + (wr - 0.5) * warp_str;
+
+            // ── Sample window texture ─────────────────────────────────────────────
+            // Hanya di dalam geometry [0,1]; luar = transparan
+            vec4 window_col = vec4(0.0);
+            if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0) {
+                vec2 suv         = clamp(warp_uv, 0.0, 1.0);
+                vec3 tex_coords  = niri_geo_to_tex * vec3(suv, 1.0);
+                window_col       = texture2D(niri_tex, tex_coords.st);
+            }
+
+            // ── Reveal window ─────────────────────────────────────────────────────
+            // Window muncul perlahan dari tengah; retakan membuka lebih cepat
+            vec2  uv_c   = uv - 0.5;
+            float cdist  = length(uv_c * vec2(1.0, 1.1));
+            float reveal = smoothstep(cdist - 0.05, cdist + 0.05, p * 1.1);
+            reveal       = clamp(reveal, 0.0, 1.0);
+
+            // ── Retakan ───────────────────────────────────────────────────────────
+            // 14 retakan muncul bertahap, acak berdasarkan niri_random_seed
+            float total_crack = 0.0;
+            float total_glow  = 0.0;
+
+            for (int i = 0; i < 14; i++) {
+                float fi         = float(i);
+                float crack_seed = seed + fi * 7.319;
+
+                // Setiap retakan punya waktu kemunculannya sendiri
+                float crack_t    = fi / 14.0;
+                float local_p    = clamp((p - crack_t) * 4.0, 0.0, 1.0);
+                float grow       = smoothstep(0.0, 1.0, local_p);
+
+                float crack_val  = singleCrack(uv, crack_seed, grow) * local_p;
+
+                // Kilatan biru-putih saat retakan baru muncul
+                float flash      = exp(-local_p * 6.0) * crack_val;
+
+                total_crack      = max(total_crack, crack_val);
+                total_glow      += flash;
+            }
+            total_glow = clamp(total_glow, 0.0, 1.0);
+
+            // Retakan padam saat window sudah sepenuhnya muncul
+            float crack_fade = 1.0 - smoothstep(0.6, 1.0, p);
+            total_crack     *= crack_fade;
+            total_glow      *= crack_fade;
+
+            // ── Shimmer tipis (noise pada window) ────────────────────────────────
+            // Kilap halus seperti pantulan kaca yang bergeser
+            float shimmer = fbm(uv * 6.0 + vec2(t * 0.25)) * 0.05
+                          * (1.0 - p) * (1.0 - p);
+
+            // ── Warna retakan ─────────────────────────────────────────────────────
+            // Biru-putih dingin — kesan kaca kristal, bukan api
+            vec3 crack_col = vec3(0.60, 0.76, 1.00);   // biru terang di garis
+            vec3 glow_col  = vec3(0.88, 0.94, 1.00);   // putih-biru saat flash
+            vec3 shimmer_col = vec3(0.70, 0.85, 1.00);
+
+            // ── Composite — premultiplied alpha ───────────────────────────────────
+            vec4 out_col = vec4(0.0);
+
+            // 1. Window di area reveal
+            out_col += window_col * reveal;
+
+            // 2. Gelap di garis retakan (kaca pecah = celah gelap)
+            float crack_dark = total_crack * (1.0 - reveal * 0.5);
+            out_col.rgb     -= vec3(0.0) * crack_dark;          // tidak gelap total —
+            out_col.rgb      = mix(out_col.rgb, vec3(0.02, 0.03, 0.06), crack_dark * 0.85);
+            out_col.a        = max(out_col.a, crack_dark * 0.9);
+
+            // 3. Glow biru di garis retakan
+            out_col.rgb += crack_col * total_crack * 0.35 * (1.0 - reveal * 0.6);
+
+            // 4. Flash putih saat retakan pertama kali muncul
+            out_col.rgb += glow_col * total_glow * 0.7;
+            out_col.a    = max(out_col.a, total_glow * 0.5);
+
+            // 5. Shimmer kaca
+            out_col.rgb += shimmer_col * shimmer * reveal;
+
+            // 6. Vignette sangat halus agar tepi terasa sinematik
+            float vig   = 1.0 - smoothstep(0.3, 0.75, length(uv_c)) * 0.25;
+            out_col.rgb *= vig;
+
+            out_col = clamp(out_col, 0.0, 1.0);
+            return out_col;
+        }
+    "
+  }
+}

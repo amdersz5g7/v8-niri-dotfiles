@@ -34,8 +34,9 @@ fi
 }
 
 update_system() {
-	paru -Syu --nocombinedupgrade
+	#paru -Syu --nocombinedupgrade
 	#checkupdates -d
+  $HOME/Documents/OpenCode/aur-security/aur-security-check wrap paru -Syu
 }
 
 case "$1" in
