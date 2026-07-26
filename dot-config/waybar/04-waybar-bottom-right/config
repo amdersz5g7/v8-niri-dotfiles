@@ -1,0 +1,325 @@
+[
+    {
+        "layer": "top", // Waybar at top layer
+        //"position": "bottom", // Waybar position (top|bottom|left|right)
+        // "position": "right",
+        "position": "right",
+        // "output": "eDP-1",
+        "font-family": "DejaVuSansMono",
+        //"height": 50, // Waybar height (to be removed for auto height)
+        //"margin-top": 4,
+        // "margin-left": 4,
+        //"margin-right": 4,
+        "margin-bottom": 31,
+        "reload_style_on_change": true,
+        //"width": 20, // Waybar width
+        "spacing": 0, // Gaps between modules (4px)
+        // Choose the order of the modules
+        // "modules-left": ["niri/workspaces","wlr/taskbar"],
+        "modules-left": [],
+        "modules-center": [],
+        "modules-right": ["clock","custom/updates","tray","network","cpu","memory","disk","pulseaudio"],
+//        // "modules-right": ["cpu", "memory", "battery", "network", "tray"],
+        // Modules configuration
+        // "sway/workspaces": {
+        //     "disable-scroll": true,
+        //     "all-outputs": true,
+        //     "warp-on-scroll": false,
+        //     "format": "{name}: {icon}",
+        //     "format-icons": {
+        //         "1": "",
+        //         "2": "",
+        //         "3": "",
+        //         "4": "",
+        //         "5": "",
+        //         "urgent": "",
+        //         "focused": "",
+        //         "default": ""
+        //     }
+        // },
+//        "niri/workspaces": {
+//            "justify": "center",
+//            "rotate": 270,
+//            "all-outputs": false,
+//            //"class": "workspaces-icon", // Set icon size in pixels
+//            //"format": "{icon}",
+//            "format": "{index}",
+//            "hide-empty": true,
+//            "current-only": true,
+//            //"format-icons": {
+//                // Named workspaces
+//                // (you need to configure them in niri)
+//                // "BROWSER": "",
+//                // "WHATSAPP": "󰖣",
+//               	// "CODE": "",
+//                // "TERMINAL": "",
+//                //"LOGSEQ": "󰠮",
+//                // Icons by state
+//                //"active": "",
+//                //"default": ""
+//            //}
+//        },
+//        "custom/logout": {
+//            "format": "⏻",
+//            "tooltip": false,
+//            "on-click": "niri msg action quit"
+//        },
+//        "keyboard-state": {
+//            "numlock": true,
+//            "capslock": true,
+//            "format": "{name} {icon}",
+//            "format-icons": {
+//                "locked": "",
+//                "unlocked": ""
+//            }
+//        },
+//        "sway/mode": {
+//            "format": "<span style=\"italic\">{}</span>"
+//        },
+//        "sway/scratchpad": {
+//            "format": "{icon} {count}",
+//            "show-empty": false,
+//            "format-icons": ["", ""],
+//            "tooltip": true,
+//            "tooltip-format": "{app}: {title}"
+//        },
+//        "mpd": {
+//            "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+//            "format-disconnected": "Disconnected ",
+//            "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+//            "unknown-tag": "N/A",
+//            "interval": 2,
+//            "consume-icons": {
+//                "on": " "
+//            },
+//            "random-icons": {
+//                "off": "<span color=\"#f53c3c\"></span> ",
+//                "on": " "
+//            },
+//            "repeat-icons": {
+//                "on": " "
+//            },
+//            "single-icons": {
+//                "on": "1 "
+//            },
+//            "state-icons": {
+//                "paused": "",
+//                "playing": ""
+//            },
+//            "tooltip-format": "MPD (connected)",
+//            "tooltip-format-disconnected": "MPD (disconnected)"
+//        },
+//        "idle_inhibitor": {
+//            "format": "{icon}",
+//            "format-icons": {
+//                "activated": "",
+//                "deactivated": ""
+//            }
+//        },
+        "tray": {
+            // "icon-size": 21,
+            "spacing": 5
+        },
+        "clock": {
+            //"tooltip-format": "<big>{:%Y %B}</big>\n<tt><big>{calendar}</big></tt>",
+            "tooltip-format": "<big>{:%d %B %Y}</big>\n\n<tt><small>{calendar}</small></tt>",
+            //"format": "{:%H\n%M\n-\n%d\n%b}",
+            "format": "\n{:%H\n%M}",
+            "interval": 1,
+            "justify": "center",
+            "format-alt": "{:%a\n\n\n%d\n%b\n\n\n%H\n%M\n%S}", //"gnome-calendar",
+            "on-click-right": "gnome-clocks",
+            "calendar": {
+                        "mode"          : "year",
+                        "mode-mon-col"  : 3,
+                        "weeks-pos"     : "left",
+                        "justify": "center",
+                        // "on-scroll"     : 1,
+                        "format": {
+                                "months":     "<span color='#ffead3'><b>{}</b></span>",
+                                "days":       "<span color='#ecc6d9'><b>{}</b></span>",
+                                "weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+                                "weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+                                "today":      "<span color='#ff6699'><b><u>{}</u></b></span>"
+                                }
+                        },
+        },
+        "cpu": {
+            "format": " {usage}%",
+            "justify": "center",
+            "tooltip": false,
+            "rotate": 270
+        },
+        "memory": {
+            "interval": 3,
+            "format": " {used:0.1f}G",
+            "tooltip-format": " {used:0.2f}G / {total:0.2f}G ({percentage}%)",
+            "justify": "center",
+            "rotate": 270
+        },
+//        "temperature": {
+//            // "thermal-zone": 2,
+//            // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+//            "critical-threshold": 80,
+//            // "format-critical": "{temperatureC}°C {icon}",
+//            "format": "{temperatureC}°C {icon}",
+//            "format-icons": ["", "", ""]
+//        },
+//        "backlight": {
+//            // "device": "acpi_video1",
+//            "format": "{percent}% {icon}",
+//            "format-icons": ["", "", "", "", "", "", "", "", ""]
+//        },
+//        "battery": {
+//            "states": {
+//                // "good": 95,
+//                "warning": 30,
+//                "critical": 15
+//            },
+//            "format": "{capacity}% {icon}",
+//            "format-charging": "{capacity}% ",
+//            "format-plugged": "{capacity}% ",
+//            "format-alt": "{time} {icon}",
+//            // "format-good": "", // An empty format will hide the module
+//            // "format-full": "",
+//            "format-icons": ["", "", "", "", ""]
+//        },
+//        "battery#bat2": {
+//            "bat": "BAT2"
+//        },
+        "network": {
+            // "interface": "wlp2*", // (Optional) To force the use of this interface
+            //"format-wifi": " ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
+            "format-wifi": " {bandwidthTotalBytes}" ,
+            "tooltip-format": "{ifname}.{essid} via {gwaddr} - {ipaddr} ",
+            "format-linked": "",
+            "format-disconnected": "⚠",
+            // "format-alt": "{ifname}: {ipaddr}/{cidr}",
+            "format-alt": "{essid}",
+            "on-click-right": "nm-connection-editor",
+            "interval": 1,
+            "justify": "center",
+            "rotate": 270
+        },
+        "pulseaudio": {
+            "scroll-step": 5, // %, can be a float
+            "format": "{icon} {volume}%",
+            "justify": "center",
+            "format-bluetooth": " {volume}%",
+            "format-bluetooth-muted": " ",
+            "format-muted": "",
+            "format-source": "{volume}% ",
+            "format-source-muted": "",
+            "format-icons": {
+                "headphone": "",
+                "hands-free": "",
+                "headset": "",
+                "phone": "",
+                "portable": "",
+                "car": "",
+                "default": ["", "", ""]
+
+            },
+            // "on-click": "pavucontrol"
+            "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+            "on-click-right": "pavucontrol",
+            "orientation": "vertical",
+            "rotate": 270
+        },
+        "disk": {
+            "format": " {used}",
+            "justify": "center",
+            "path": "/",
+            "rotate": 270,
+            "on-click": "footclient --title 'app_float' -e sh -c 'dua i $HOME; echo; echo \"Press Enter to close...\"; read'"
+        },
+//        "custom/media": {
+//            "format": "{icon} {}",
+//            "return-type": "json",
+//            "max-length": 40,
+//            "format-icons": {
+//                "spotify": "",
+//                "default": "🎜"
+//            },
+//            "escape": true,
+//            "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
+//            // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+//        },
+        "custom/updates": {
+            "format": "{icon}{text}",
+            "return-type": "json",
+            "justify": "center",
+            //"rotate": 270,
+            "format-icons": {
+                "has-updates": "󱍷\n",
+                "updated": ""
+            },
+            "exec-if": "command -v waybar-module-pacman-updates",
+            "exec": "waybar-module-pacman-updates --no-zero-output --color-semver-updates ",
+            // "on-click": "uxterm -bg black -fg white -title app_float -e 'zsh -c \"~/.config/polybar/Updates --update-system; print -n \\\"Press enter to exit...\\\";read;\"'",
+            "on-click": "footclient --title 'app_float' -o colors-dark.background=000000 -o colors-dark.foreground=00ff00  zsh -c '~/.config/polybar/Updates --update-system; read -k1 \"?Press enter to exit...\"'",
+            // "on-click": "uxterm -bg black -fg white -title app_float -e 'zsh -c \"~/.config/polybar/Updates --update-system; print -n \\\"Press enter to exit...\\\";read;\"'",
+            "on-click-right": "footclient --title 'app_float' zsh -c '~/.config/polybar/Updates --print-updates; read -k1 \"?Press enter to exit...\"'"
+        }
+    },
+    {
+        "name": "dock-mode",
+        "layer": "top",
+        "position": "bottom",
+        "margin-right": -27,
+        "margin-left": 0,
+        "reload_style_on_change": true,
+        "cffi/niri-taskbar": {
+          "module_path": "/usr/lib/waybar/modules/libniri_taskbar-focused.so",
+          "icon-size": 25,
+          "active-first": false,
+          "tooltip-format": "{title}"
+        },
+        "modules-left": ["niri/window"],
+        "modules-center": ["custom/window_stats"],
+        "modules-right": ["cffi/niri-taskbar"],
+        "pulseaudio": {
+            "scroll-step": 5,
+            "format": " {icon} {volume}% ",
+            "justify": "center",
+            "format-bluetooth": " {volume}%",
+            "format-bluetooth-muted": " ",
+            "format-muted": "",
+            "format-source": "{volume}% ",
+            "format-source-muted": "",
+            "format-icons": {
+                "headphone": "",
+                "hands-free": "",
+                "headset": "",
+                "phone": "",
+                "portable": "",
+                "car": "",
+                "default": ["", "", ""]
+            },
+            "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+            "on-click-right": "pavucontrol"
+        },
+        "niri/window": {
+            "format": "{}",
+            "icon": true,
+            "icon-size": 24,
+            "separate-outputs": true
+        },
+        "niri/workspaces": {
+            "justify": "center",
+            "all-outputs": false,
+            "format": "{index}",
+            "hide-empty": true,
+            "current-only": true
+        },
+        "custom/window_stats": {
+            "exec": "~/.config/waybar/scripts/active_win_stats.sh",
+            "interval": 1,
+            "format": "{}",
+            "tooltip": false,
+            "all-outputs": false,
+            "return-type": "json",
+            "on-click": "btop"
+        }
+    }
+]

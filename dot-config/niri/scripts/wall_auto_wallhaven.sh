@@ -1,152 +1,105 @@
 #!/bin/bash
-
-#--- NOTES ---
-#
-# Prerequisted: swaybg
-# use: 
-#   ./wall_auto_wallhaven.sh
-#   ./wall_auto_wallhaven.sh {image-id}
-#   example: ./wall_auto_wallhaven.sh mp5wqm
+# wall_auto_wallhaven.sh — download & apply random wallhaven wallpaper
+# Usage: ./wall_auto_wallhaven_v2.sh [day|night|image-id|query:SEARCH_QUERY]
+# Dependencies: curl, wget, wal, awww, grep (pcre)
 #
 # Adapted for Niri WM with static wallpaper path and wal cache fix.
-#--- NOTES ---
+# v2.1: Manual mode support.
 
-image_id=$1
-filetype=${2:-jpg} # Wallhaven can have jpg or png, defaults to jpg.
+set -euo pipefail
 
-# Konfigurasi
-#GLOBAL_QUERY="like%3Ap8652m"   # food
-#GLOBAL_QUERY="like%3Aqr21xl"   # landscape
-#GLOBAL_QUERY="like%3Ak7ggdm"    # spiderman
-#GLOBAL_QUERY="like%3A1qprmv"    # cyber city
-#GLOBAL_QUERY="like%3Aw5q29r"    # games
-#GLOBAL_QUERY="like%3A3l1e1y"    # car
-GLOBAL_QUERY="like%3Agw73wq"    # mountain
-
+# === Config ===
 DAY_QUERY="day,nature,landscape,mountain"
-NIGHT_QUERY="night,building"
+NIGHT_QUERY="night,nature,landscape,mountain,ocean"
 
-DAY_QUERY=$GLOBAL_QUERY
-NIGHT_QUERY=$GLOBAL_QUERY
+WALLPAPER_DIR="$HOME/Pictures"
+CACHE_PATH="$HOME/.cache/last_wallpaper.path"
+RESOLUTION="1920x1080"
+DAY_START=6
+NIGHT_START=18
 
-DAY_START=6  # Jam 6 pagi
-NIGHT_START=18  # Jam 6 sore
+# === Helpers ===
+get_hour() { date +%H; }
+is_daytime() { (( 10#$(get_hour) >= DAY_START && 10#$(get_hour) < NIGHT_START )); }
 
-# Fungsi untuk mengunduh wallpaper dari Wallhaven
+# === Core ===
 download_wallpaper() {
-    query=$1
+    local query="${1:-}" image_id="${2:-}" filetype="jpg" page
 
-    if [ -n "$query" ]; then
-        search_url="https://wallhaven.cc/search?q=$query&resolution=1920x1080&sorting=random&order=desc"        
-        
-        # Mengambil halaman pencarian
-        search_page=$(curl -s "$search_url")
-        #echo $search_page
-
-        # Ekstrak ID gambar dari halaman pencarian
-        image_id=$(echo "$search_page" | grep -oP 'https://wallhaven.cc/w/\K\w+' | sort | uniq | shuf | head -n 1) 
-        echo "image-id: $image_id"
-    fi
-
-    if [ -n "$image_id" ]; then
-    
-        search_page=$(curl -s "https://wallhaven.cc/w/$image_id")
-        if [ -z "$search_page" ]; then
-            echo "Failed to fetch the webpage. Check your internet connection or URL."
-            exit 1
-        fi
-
-        # echo $search_page > ./echo_wallhaven.txt
-        if echo "$search_page" | grep -q " - PNG"; then
-            filetype="png"
-        else
-            filetype="jpg"
-        fi
-
-        echo "file-type: $filetype"
-
-        # get directory format
-        DIR=${image_id:0:2}
-
-        # Ekstrak URL gambar penuh dari halaman gambar
-        image_url="https://w.wallhaven.cc/full/$DIR/wallhaven-$image_id.$filetype"
-        
-        if [ -n "$image_url" ]; then
-            # Use a static path for the wallpaper. Note: we save as .jpg for consistency.
-            CURRENT_WALLPAPER="$HOME/Pictures/current_wallpaper.$filetype"
-
-            # Mengunduh gambar, menimpa file yang ada
-            wget -O "$CURRENT_WALLPAPER" "$image_url" # > /dev/null 2>&1
-
-            # Simpan path untuk startup script
-            echo "$CURRENT_WALLPAPER" > "$HOME/.cache/last_wallpaper.path"
-
-            # Force wal to regenerate colors by deleting the specific cache file first.
-            wal -c
-
-            # Generate color scheme with wal
-            wal -i "$CURRENT_WALLPAPER" --saturate 0.3 > /dev/null 2>&1
-            
-            # Update brave/chromium theme (optional)
-            # If you use this, make sure the script exists and is compatible.
-            ~/Documents/AppScripts/ChromiumPywal/generate-theme.sh > /dev/null 2>&1    
-
-            makoctl reload > /dev/null 2>&1
-
-            # echo "Wallpaper downloaded successfully"
-            return 0
-        else
-            echo "Failed to get full image URL"
-            return 1
-        fi
+    # Step 1: Get image ID (from arg or random search)
+    if [[ -n "$image_id" ]]; then
+        echo "ID: $image_id"
+    elif [[ -n "$query" ]]; then
+        page=$(curl -sf "https://wallhaven.cc/search?q=$query&resolution=${RESOLUTION}&sorting=random&order=desc") \
+            || { echo "Search fetch failed"; return 1; }
+        image_id=$(echo "$page" | grep -oP 'https://wallhaven.cc/w/\K\w+' | sort -u | shuf -n1)
+        [[ -z "$image_id" ]] && { echo "No ID found for query: $query"; return 1; }
+        echo "Query: $query | ID: $image_id"
     else
-        echo "Failed to get wallpaper ID"
-        return 1
+        echo "No query or ID provided"; return 1
     fi
+
+    # Step 2: Fetch detail page, detect filetype
+    page=$(curl -sf "https://wallhaven.cc/w/$image_id") \
+        || { echo "Detail fetch failed"; return 1; }
+    echo "$page" | grep -q " - PNG" && filetype="png"
+
+    # Step 3: Download full image
+    local dir="${image_id:0:2}"
+    local url="https://w.wallhaven.cc/full/$dir/wallhaven-$image_id.$filetype"
+    local out="$WALLPAPER_DIR/current_wallpaper.$filetype"
+
+    echo "Downloading: $url"
+    wget -q --show-progress --no-check-certificate -O "$out" "$url" \
+        || { echo "Download failed"; return 1; }
+
+    local size
+    size=$(du -sh "$out" | cut -f1)
+    echo "Downloaded: $size"
+
+    # Step 4: Update cache + wal
+    echo "$out" > "$CACHE_PATH"
+    wal -c >/dev/null 2>&1
+    wal -qi "$out" --saturate 0.3 >/dev/null 2>&1
+
+    # Step 5: Optional integrations
+    [[ -x "$HOME/Documents/AppScripts/ChromiumPywal/generate-theme.sh" ]] \
+        && "$HOME/Documents/AppScripts/ChromiumPywal/generate-theme.sh" >/dev/null 2>&1
+    makoctl reload >/dev/null 2>&1
+
+    return 0
 }
 
-# Fungsi untuk mengatur wallpaper menggunakan swww
 set_wallpaper() {
-    # Daftar jenis transisi yang tersedia. not used: fide
-    TRANSITION_TYPES=("wipe" "grow" "center" "outer")
-    # Pilih jenis transisi secara acak
-    RANDOM_TRANSITION=${TRANSITION_TYPES[$(( RANDOM % ${#TRANSITION_TYPES[@]} ))]}
+    local transitions=("wipe" "grow" "center" "outer")
+    local chosen="${transitions[RANDOM % ${#transitions[@]}]}"
+    local current
+    current=$(cat "$CACHE_PATH" 2>/dev/null) || current="$WALLPAPER_DIR/current_wallpaper.jpg"
 
-    # swww akan menangani transisi dan daemon secara otomatis
-    swww img "$CURRENT_WALLPAPER" --transition-type "$RANDOM_TRANSITION"
-
-    ~/.config/niri/scripts/update_border_color.sh
+    awww img "$current" --transition-type "$chosen"
+    "$HOME/.config/niri/scripts/update_border_color.sh" 2>/dev/null || true
 }
 
-# Fungsi untuk mendapatkan jam saat ini (dalam format 24 jam)
-get_current_hour() {
-    date +%H
-}
+# === Main ===
+arg="${1:-}"
 
-# Fungsi untuk menentukan apakah sekarang siang atau malam
-is_daytime() {
-    current_hour=$(get_current_hour)
-    if [ $current_hour -ge $DAY_START ] && [ $current_hour -lt $NIGHT_START ]; then
-        return 0  # True, ini siang hari
-    else
-        return 1  # False, ini malam hari
-    fi
-}
-
-# Main execution
-if [ -n "$image_id" ]; then
-    if download_wallpaper; then
-        echo "Set wallpaper by image_id"
-        set_wallpaper
-    fi
+if [[ "$arg" == "day" ]]; then
+    echo "Mode: Manual DAY"
+    download_wallpaper "$DAY_QUERY" "" && set_wallpaper
+elif [[ "$arg" == "night" ]]; then
+    echo "Mode: Manual NIGHT"
+    download_wallpaper "$NIGHT_QUERY" "" && set_wallpaper
+elif [[ "$arg" == query:* ]]; then
+    custom_query="${arg#query:}"
+    echo "Mode: Custom QUERY ($custom_query)"
+    download_wallpaper "$custom_query" "" && set_wallpaper
+elif [[ -n "$arg" ]]; then
+    echo "Mode: Manual ID"
+    download_wallpaper "" "$arg" && set_wallpaper
 elif is_daytime; then
-    if download_wallpaper "$DAY_QUERY"; then
-        #echo "Set day wallpaper"
-        set_wallpaper
-    fi
+    echo "Mode: Auto DAY"
+    download_wallpaper "$DAY_QUERY" "" && set_wallpaper
 else
-    if download_wallpaper "$NIGHT_QUERY"; then
-        #echo "Set night wallpaper"
-        set_wallpaper
-    fi
+    echo "Mode: Auto NIGHT"
+    download_wallpaper "$NIGHT_QUERY" "" && set_wallpaper
 fi

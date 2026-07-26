@@ -1,6 +1,6 @@
 animations {
 	window-close {
-		duration-ms 500
+		duration-ms 700
 		custom-shader r"
 	    float hash(vec2 p) {
                 return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -70,5 +70,7 @@ animations {
                 return color * remain * tail;
             }
 	    "
-	}
+    }
+    config-notification-open-close { curve "cubic-bezier" 0.25 0.1 0.25 1.0; }
+    overview-open-close { curve "cubic-bezier" 0.25 0.1 0.25 1.0; }
 }

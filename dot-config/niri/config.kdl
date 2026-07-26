@@ -16,15 +16,18 @@ input {
     }
 
     // Uncomment this to make the mouse warp to the center of newly focused windows.
-    warp-mouse-to-focus
+    //warp-mouse-to-focus
 
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-    //focus-follows-mouse 
-    //max-scroll-amount="0%"
+    focus-follows-mouse max-scroll-amount="0%"
+
+    mouse
 }
 hotkey-overlay { skip-at-startup; }
 output "HDMI-A-2" {
+    position x=1366 y=0
+
     focus-at-startup
 }
 // Settings that influence how windows are positioned and sized.
@@ -51,13 +54,14 @@ layout {
         width 6
 
         // Gradients override solid colors.
-        active-gradient from="#477183" to="#b3ccd6" angle=135 in="oklch longer hue" relative-to="workspace-view"
-        inactive-gradient from="#010914" to="#9ca1a350" angle=0
+        active-gradient from="#283c4b" to="#c5dfd0" angle=135 in="oklch longer hue" relative-to="workspace-view"
+        inactive-gradient from="#022808" to="#9c7da350" angle=0
     }
 
     // You can enable drop shadows for windows.
     shadow {
         on
+
         softness 30
         spread 5
         offset x=0 y=5
@@ -76,7 +80,7 @@ layout {
     background-color "transparent"
 }
 
-spawn-at-startup "swww-daemon"
+spawn-at-startup "awww-daemon"
 spawn-at-startup "waybar"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-at-startup "xrdb -merge ~/.Xdefaults; xrdb -merge ~/.Xresources"
@@ -100,7 +104,8 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // Animation settings.
 // The wiki explains how to configure individual animations:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Animations
-animations {    
+animations {
+    
     workspace-switch {
         spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
     }
@@ -137,6 +142,7 @@ animations {
     }
 }
 
+//include "animation_fire_open.kdl"
 include "animation_glitch_open.kdl"
 //include "animation_glitch_close.kdl"
 //include "animation_smoke_open.kdl"
@@ -144,7 +150,7 @@ include "animation_smoke_close.kdl"
 
 // Make the wallpaper stationary, rather than moving with workspaces.
 layer-rule {
-    match namespace="swww"
+    match namespace="awww"
     place-within-backdrop true
 }
 
@@ -171,42 +177,48 @@ recent-windows {
 
     previews {
         // max-height 1000
-        max-scale 0.80
+        max-scale 0.8
     }
 
     binds {
-        Alt+Tab         { next-window; }
-        Alt+Shift+Tab   { previous-window; }
-        Alt+grave       { next-window     filter="app-id"; }
+        //Alt+Tab         { next-window; }
+        //Alt+Shift+Tab   { previous-window; }
+        Alt+grave       { next-window filter="app-id"; }
         Alt+Shift+grave { previous-window filter="app-id"; }
 
         Mod+Tab         { next-window; }
         Mod+Shift+Tab   { previous-window; }
-        Mod+grave       { next-window     filter="app-id"; }
+        Mod+grave       { next-window filter="app-id"; }
         Mod+Shift+grave { previous-window filter="app-id"; }
     }
 }
 
+// Toggle waybar dengan Super+B
+// bind "Super+B" { spawn "sh" "-c" "kill -SIGUSR1 $(pgrep -x waybar)"; }
+
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
-    Mod+Space { spawn "~/.config/rofi/launchers/type-3/launcher.sh"; }
-    Mod+Return { spawn "uxterm"; }
-    Mod+Shift+Return { spawn "uxterm" "-title" "app_float";}
+    Mod+Space { spawn "~/.config/rofi/launchers/type-4/launcher.sh"; }
+    Mod+Return { spawn "footclient"; }
+    Mod+Shift+Return { spawn "footclient" "--title=app_float"; }
     Mod+D { spawn "fuzzel"; }
     Super+l { spawn "~/.config/niri/scripts/do_lock.sh"; }
     Mod+e { spawn "nemo"; }
     
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
-    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
 
     Mod+Q { close-window; }
     Mod+O repeat=false { toggle-overview; }
 
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
-    Mod+H     { focus-column-left; }
+    // Mod+H     { focus-column-left; }
+    // Toggle waybar dengan Super+B
+    // Mod+h { spawn "sh" "-c" "kill -SIGUSR1 $(pgrep -x waybar)"; }
+    Mod+b { spawn "sh" "-c" "pgrep -x waybar && pkill -x waybar || waybar &"; }
     Mod+J     { focus-window-down; }
     Mod+K     { focus-window-up; }
     Mod+L     { focus-column-right; }
@@ -263,12 +275,12 @@ binds {
     // To avoid scrolling through workspaces really fast, you can use
     // the cooldown-ms property. The bind will be rate-limited to this value.
     // You can set a cooldown on any bind, but it's most useful for the wheel.
-    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
-    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
-    Mod+Shift+Down            cooldown-ms=150 { move-column-to-workspace-down; }
-    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
-    Mod+Shift+Up              cooldown-ms=150 { move-column-to-workspace-up; }
+    Mod+Shift+Down cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-column-to-workspace-up; }
+    Mod+Shift+Up cooldown-ms=150 { move-column-to-workspace-up; }
 
     Mod+WheelScrollRight      { focus-column-right; }
     Mod+WheelScrollLeft       { focus-column-left; }
@@ -323,8 +335,8 @@ binds {
 
     // Switches focus between the current and the previous workspace.
     // Mod+Tab { focus-workspace-previous; }
-    // Mod+Tab { spawn "~/.config/niri/scripts/window_switcher.sh"; }
-    Alt+Tab { focus-workspace-previous; }
+    Alt+Tab { spawn "~/.config/niri/scripts/window_switcher.sh"; }
+    // Alt+Tab { focus-workspace-previous; }
 
     // Consume one window from the right into the focused column.
     Mod+Comma  { consume-window-into-column; }
@@ -372,24 +384,27 @@ binds {
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 
+    // Mod+h { spawn "bash -c 'pgrep waybar && pkill waybar || waybar &'"; }
 }
 
 // workspace rules let you adjust behavior for individual workspaces.
-workspace "BROWSER" {
-    open-on-output "HDMI-A-2"
-}
-workspace "TERMINAL" {
-    open-on-output "HDMI-A-2"
-}
-workspace "CODE" {
-    open-on-output "HDMI-A-2"
-}
-workspace "LOGSEQ" {
-    open-on-output "HDMI-A-2"
-}
-workspace "WHATSAPP" {
-    open-on-output "HDMI-A-2"
-}
+
+//workspace "BROWSER" {
+//    open-on-output "HDMI-A-2"
+//}
+//workspace "TERMINAL" {
+//    open-on-output "HDMI-A-2"
+//}
+//workspace "CODE" {
+//    open-on-output "HDMI-A-2"
+//}
+//workspace "LOGSEQ" {
+//    open-on-output "HDMI-A-2"
+//}
+//workspace "WHATSAPP" {
+//    open-on-output "HDMI-A-2"
+//}
+
 
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
@@ -398,18 +413,30 @@ window-rule {
     exclude app-id="brave-browserx"
     match is-active=false
 
-    opacity 0.9
+    opacity 0.8
 
-    geometry-corner-radius 7
+    geometry-corner-radius 0
     clip-to-geometry true
+
+    background-effect {
+      blur true
+      xray true
+    }
 }
 
 window-rule {
     match is-active=true
     //default-column-width {}
 
-    geometry-corner-radius 10
+    geometry-corner-radius 0
     clip-to-geometry true
+
+    opacity 0.9
+
+    background-effect {
+      blur true
+      xray true
+    }
 }
 
 window-rule {
@@ -440,8 +467,8 @@ window-rule {
     open-floating true
     //default-column-width { fixed 1000; }
     //default-window-height { fixed 500; }
-    //default-floating-position x=0 y=0 relative-to="bottom"
-    default-window-height { proportion 0.5; }
+    default-floating-position x=0 y=0 relative-to="bottom"
+    default-window-height { proportion 0.4; }
     default-column-width { proportion 0.6; }
 }
 
@@ -494,8 +521,8 @@ window-rule {
 //    match title="WhatsApp Web"
 //    open-on-workspace "WHATSAPP"
 //}
-window-rule{
-    match title="#"
+window-rule {
+    //match title="#"
     match title="YouTube"
 
     open-floating true
@@ -504,5 +531,20 @@ window-rule{
 gestures {
   hot-corners {
     off
-  }
+    }
+  // Increase the trigger area and maximum speed.
+  //dnd-edge-workspace-switch {
+  //     trigger-height 100
+  //     max-speed 3000
+  //}
+}
+
+environment
+output "eDP-1" {
+    mode "1366x768@60.111"
+
+    scale 1.0
+
+    transform "normal"
+    position x=0 y=0
 }
